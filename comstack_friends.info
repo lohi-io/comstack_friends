@@ -1,0 +1,30 @@
+name = Communications Stack - Friends
+description = Adds in a friend and block list for use around Comstack elements though could be used without.
+core = 7.x
+package = Communications Stack
+php = 5.3
+
+dependencies[] = comstack
+dependencies[] = user_relationships
+dependencies[] = user_relationship_views
+dependencies[] = ctools
+dependencies[] = context
+dependencies[] = user_preferences
+
+features[context][] = comstack_friends
+features[ctools][] = context:context:3
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[user_permission][] = can have comstack_blocked relationships
+features[user_permission][] = can have comstack_friends relationships
+features[user_permission][] = can request comstack_blocked relationships
+features[user_permission][] = can request comstack_friends relationships
+features[user_permission][] = delete comstack_blocked relationships
+features[user_permission][] = delete comstack_friends relationships
+features[user_permission][] = maintain comstack_blocked relationships
+features[user_permission][] = maintain comstack_friends relationships
+features[user_relationship][] = comstack_blocked
+features[user_relationship][] = comstack_friends
+features[views_view][] = comstack_friends
+features[views_view][] = comstack_friends_search
+features_exclude[dependencies][features] = features

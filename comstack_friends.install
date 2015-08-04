@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Deploy the comstack relationship types.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function comstack_friends_uninstall() {
+  // Remove any variables.
+  variable_del('comstack_friends_dissolve_on_block');
+  variable_del('comstack_friends_restrict_entity_ref_to_friends');
+}
