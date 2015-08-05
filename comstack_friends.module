@@ -6,6 +6,26 @@
  */
 
 /**
+ * Implements hook_permission().
+ */
+function comstack_friends_permission() {
+  return array(
+    'access other users comstack_friends' => array(
+      'title' => t('Access other users friends lists'),
+      'description' => t('Allows users to view other users friends lists.'),
+    ),
+    'access other users comstack_pending' => array(
+      'title' => t('Access other users pending lists'),
+      'description' => t('Allows users to view other users pending friend requests lists.'),
+    ),
+    'access other users comstack_blocked' => array(
+      'title' => t('Access other users blocked lists'),
+      'description' => t('Allows users to view other users blocked lists.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_user_preferences().
  */
 function comstack_friends_user_preferences() {
@@ -36,6 +56,15 @@ function comstack_friends_user_preferences() {
         ),
       ),
     ),
+  );
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function comstack_friends_views_api() {
+  return array(
+    'api' => '3.0',
   );
 }
 
@@ -86,4 +115,45 @@ function comstack_friends_query_comstack_recipients_alter(QueryAlterableInterfac
     // Add in username sort for good measure.
     $query->orderBy('name');
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function comstack_friends_form_views_exposed_form_alter(&$form, $form_state, $form_id) {
+  // Only alter the exposed filter form for the search view.
+  if ($form['#id'] === 'views-exposed-form-comstack-friends-search-page') {
+    // Add a class to the form.
+    if (empty($form['#attributes']['class'])) {
+      $form['#attributes']['class'] = array();
+    }
+    $form['#attributes']['class'][] = 'form-horizontal';
+
+    // Add a placeholder attribute.
+    $form['name']['#placeholder'] = t('Find new and existing friends by entering their username...');
+    $form['name']['#attributes']['placeholder'] = $form['name']['#placeholder'];
+  }
+}
+
+/**
+ * View access plugin callback.
+ */
+function comstack_friends_views_check_perm($bypass_perm, $perm, $account = NULL) {
+  global $user;
+
+  if (!$account) {
+    $account = $user;
+  }
+
+  // Check the permission first.
+  if (user_access($bypass_perm, $account)) {
+    return TRUE;
+  }
+
+  // Grab the user ID from the URL.
+  if ((arg(0) === 'user' || arg(0) === 'friends') && is_numeric(arg(1)) && $account->uid == arg(1) && user_access($perm, $account)) {
+    return TRUE;
+  }
+
+  return FALSE;
 }
