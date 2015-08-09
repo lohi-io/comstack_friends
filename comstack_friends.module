@@ -26,6 +26,23 @@ function comstack_friends_permission() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function comstack_friends_menu() {
+  // /cd-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
+  $items['cs-friends/%/%/%/%/%ctools_js'] = array(
+    'title' => 'Comstack Friends',
+    'page callback' => 'comstack_friends_link_action_callback',
+    'page arguments' => array(1, 2, 3, 5),
+    'access callback' => 'comstack_friends_action_access_callback',
+    'access arguments' => array(1, 2, 3, 4),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
  * Implements hook_user_preferences().
  */
 function comstack_friends_user_preferences() {
@@ -65,6 +82,24 @@ function comstack_friends_user_preferences() {
 function comstack_friends_views_api() {
   return array(
     'api' => '3.0',
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function comstack_friends_theme($existing, $type, $theme, $path) {
+  return array(
+    'comstack_friends_link' => array(
+      'variables' => array(
+        'type' => NULL,
+        'requester_uid' => NULL,
+        'requestee_uid' => NULL,
+        'requestee_username' => NULL,
+        'classes_array' => array(),
+        'link_text' => NULL,
+      ),
+    ),
   );
 }
 
@@ -156,4 +191,311 @@ function comstack_friends_views_check_perm($bypass_perm, $perm, $account = NULL)
   }
 
   return FALSE;
+}
+
+/**
+ * Return all of the requester users current relationships. We've got our own
+ * function because whilst user_relationships_load() has static caching it only
+ * works if requesting a specific relationship, not all for one user which is
+ * what we want.
+ */
+function comstack_friends_get_relationships($uid, $reset = FALSE) {
+  $relationships = &drupal_static(__FUNCTION__, array());
+
+  if (empty($relationships[$uid]) || $reset) {
+    $source_relationships = user_relationships_load(array('user' => $uid));
+    $relationships[$uid] = array();
+
+    if ($source_relationships) {
+      foreach ($source_relationships as $rid => $relationship) {
+        $other_person_uid = $relationship->requester_id == $uid ? $relationship->requestee_id : $relationship->requester_id;
+        $relationship->other_uid = $other_person_uid;
+
+        // Populate indexes by user id and relationship type.
+        $relationships[$uid][$other_person_uid][$relationship->machine_name] = $relationship;
+        $relationships[$uid][$relationship->machine_name][$other_person_uid] = $relationship;
+      }
+    }
+  }
+
+  return $relationships[$uid];
+}
+
+/**
+ * Menu access callback.
+ *
+ * Validate that the current user.
+ */
+function comstack_friends_action_access_callback($action, $uid, $target_uid, $token) {
+  global $user;
+
+  // Load the account who's attempting to do something.
+  $account = user_load($uid);
+
+  if (!$account) {
+    return FALSE;
+  }
+
+  // Go away, anon!
+  if (!$user->uid) {
+    return FALSE;
+  }
+
+  // Allow user_relationships high level permission for the current user.
+  // Admin users can accept/reject requests on behalf of users but that's it.
+  if (user_access('administer user relationships') && ($action === 'accept' || $action === 'reject')) {
+    return TRUE;
+  }
+
+  // Check the token.
+  if (!drupal_valid_token($token, "$action$uid$target_uid")) {
+    return FALSE;
+  }
+
+  // Default is "request".
+  switch ($action) {
+    case 'accept':
+    case 'decline':
+      $permission_to_check = 'maintain comstack_friends relationships';
+      break;
+    case 'block':
+    case 'unblock':
+      $permission_to_check = 'can have comstack_blocked relationships';
+      break;
+    default:
+      $permission_to_check = 'can request comstack_friends relationships';
+      break;
+  }
+
+  return user_access($permission_to_check, $user);
+}
+
+/**
+ * Perform an action involving two users, at this stage we've validated that
+ * the current user (admin or user who's $uid) can perform this action so we
+ * only need to worry about carrying it out.
+ */
+function comstack_friends_link_action_callback($action, $uid, $target_uid, $js = NULL) {
+  $relationship_name = $action != 'block' ? 'comstack_friends' : 'comstack_blocked';
+  $relationship_type = user_relationships_type_machine_name_load($relationship_name);
+  $requester = user_load($uid);
+  $requestee = user_load($target_uid);
+
+  // If any of the above have failed to load then quit now.
+  if (!$relationship_type || !$requester || $requestee) {
+    return FALSE;
+  }
+
+  // Down to it. If we're doing an action which will cause the requestee to
+  // have to do something, first check they allow friend requests.
+  if ($action === 'request' && !user_preferences($target_uid, 'comstack_friends_allow_requests')) {
+    return FALSE;
+  }
+
+  // Check the relationship doesn't already exist.
+  $relationships = user_relationships_load(array('between' => array($uid, $target_uid), 'rtid' => $relationship_type->rtid));
+  if ($relationships) {
+    // Already exists.
+    return FALSE;
+  }
+
+  // Create the relationship.
+  $relationship = user_relationships_request_relationship($requester, $requestee, $relationship_type);
+
+  // Trigger any notifications.
+  if ($relationship) {
+
+  }
+
+  return $relationship;
+}
+
+/**
+ * Add the necessary JavaScript to the page required for our friend links to
+ * work.
+ */
+function comstack_friends_add_link_js() {
+  static $_comstack_friends_js_added;
+
+  // Only do this once.
+  if (isset($_comstack_friends_js_added)) {
+    return FALSE;
+  }
+
+  $_comstack_friends_js_added = TRUE;
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js();
+
+  drupal_add_js(drupal_get_path('module', 'comstack_friends') . '/js/cs-friends.js');
+  drupal_add_js(array(
+    'comstackFriends' => array(
+      'useConfirmModal' => array(
+        'request' => TRUE,
+        'approve' => FALSE,
+        'block' => TRUE,
+      ),
+      'modalStrings' => array(
+        'request' => array(
+          'do' => t('Are you sure you want to send @username a friend request?'),
+        ),
+        'approve' => array(
+          'do' => t("Are you sure you want to approve @username's friend request?"),
+        ),
+        'block' => array(
+          'do' => t('Are you sure you want to block @username?'),
+          'undo' => t('Are you sure you want to unblock @username?'),
+        ),
+        'buttons' => array(
+          'confirm' => t('OK'),
+          'cancel' => t('Cancel'),
+        ),
+      ),
+      // When a user blocks another user, should we disable any "Add friend" or
+      // "Accept" friend request buttons relating to that user?
+      'onBlockDisableRequestOrAccept' => TRUE,
+    ),
+  ), 'setting');
+}
+
+/**
+ * Theme callback, produce a Comstack friends link.
+ */
+function theme_comstack_friends_link($variables) {
+  extract($variables);
+
+  // Prevent the user from creating relationships with themselves. Anon too.
+  if ($requester_uid == $requestee_uid || $requester_uid == 0 || $requestee_uid == 0) {
+    return;
+  }
+
+  // Prevent any messing with this function.
+  if (!is_numeric($requester_uid) || !is_numeric($requestee_uid)) {
+    return;
+  }
+
+  // Let's get started.
+  comstack_friends_add_link_js();
+  $disabled = FALSE;
+
+  // Sort out our classes.
+  $variables['classes_array'][] = 'cs-f-' . $type;
+
+  // Determine the action from the type and state.
+  $relationships = comstack_friends_get_relationships($requester_uid);
+
+  $action = NULL;
+  if ($type === 'comstack_friends') {
+    // Ok, for friends we've got multiple states, friends already, no prior
+    // relationship, requested relationship, relationship requested (by the
+    // other user), in which case accept or reject. Also factor in blocked by
+    // the other user (good gravy) where other user has blocked, therefore this
+    // user shouldn't get any options whatsoever.
+
+    // These users are already friends.
+    if (isset($relationships['comstack_friends'][$requestee_uid]) && $relationships['comstack_friends'][$requestee_uid]->approved == 1) {
+      if (variable_get('comstack_friends_already_friends_hide_button', TRUE)) {
+        return;
+      }
+
+      $action = 'friends';
+    }
+    // The current user has been blocked by the target user.
+    elseif (isset($relationships['comstack_blocked'][$requestee_uid]) && $relationships['comstack_blocked'][$requestee_uid]->requester_id == $requestee_uid) {
+      return;
+    }
+    // No prior relationship.
+    elseif (!isset($relationships[$requestee_uid])) {
+      $action = 'request';
+    }
+    // This user has already requested a relationship with the target user.
+    elseif (isset($relationships['comstack_friends'][$requestee_uid]) && $relationships['comstack_friends'][$requestee_uid]->requester_id == $requester_uid && $relationships['comstack_friends'][$requestee_uid]->approved == 0) {
+      $action = 'requested';
+    }
+    // The other user has requested a relationship, allow this user to accept.
+    // Another action could be reject.
+    elseif (isset($relationships['comstack_friends'][$requestee_uid]) && $relationships['comstack_friends'][$requestee_uid]->requestee_id == $requester_uid && $relationships['comstack_friends'][$requestee_uid]->approved == 0) {
+      $action = 'accept';
+    }
+  }
+  else {
+    // The current user has been blocked by the target user, so they can't do
+    // anything.
+    if (isset($relationships['comstack_blocked'][$requestee_uid]) && $relationships['comstack_blocked'][$requestee_uid]->requester_id == $requestee_uid) {
+      return;
+    }
+    // User hasn't blocked, so has the option to block them.
+    elseif (!isset($relationships['comstack_blocked'][$requestee_uid])) {
+      $action = 'block';
+    }
+    elseif (isset($relationships['comstack_blocked'][$requestee_uid]) && $relationships['comstack_blocked'][$requestee_uid]->requester_id == $requester_uid) {
+      $action = 'unblock';
+    }
+  }
+
+  // And the link text, "request" action is the default.
+  switch ($action) {
+    case 'friends':
+      $text = t('Friends');
+      $disabled = TRUE;
+      break;
+    case 'requested':
+      $text = t('Request sent');
+      $disabled = TRUE;
+      break;
+    case 'accept':
+      $text = t('Accept');
+      break;
+    case 'reject':
+      $text = t('Reject');
+      break;
+    case 'block':
+      $text = t('Block');
+      break;
+    case 'unblock':
+      $text = t('Unblock');
+      break;
+    default:
+      $text = t('Add friend');
+      break;
+  }
+
+  // Load the requestee username if it's not been passed to us.
+  if (!$requestee_username) {
+    $requestee_user = user_load($requestee_uid);
+
+    if ($requestee_user) {
+      $requestee_username = $requestee_user->name;
+    }
+    else {
+      return;
+    }
+  }
+
+  // Chuck in extra data attributes we want.
+  $attributes['data-cs-f-actions'] = $action;
+  $attributes['data-requester-uid'] = $requester_uid;
+  $attributes['data-requestee-uid'] = $requestee_uid;
+  // All attributes get check plained by drupal_attributes().
+  $attributes['data-username'] = $requestee_username;
+
+  // Certain actions will mean that the link is disabled and shouldn't allow
+  // further action.
+  if ($disabled) {
+    $url = '#';
+    $variables['classes_array'][] = 'btn-disabled';
+    $attributes['disabled'] = 'disabled';
+  }
+  // Build the URL.
+  else {
+    // cd-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
+    $token = drupal_get_token("$action$requester_uid$requestee_uid");
+    $url = url("cs-friends/$action/$requester_uid/$requestee_uid/$token/nojs");
+  }
+
+  // Finish up with the classes.
+  $variables['classes_array'][] = 'cs-f-' . $action;
+  $attributes['class'] = $variables['classes_array'];
+
+  return '<span class="cs-f-link-wrapper"><a href="' . $url . '"' . drupal_attributes($attributes) . '>' . $text . '</a></span>';
 }
