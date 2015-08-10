@@ -344,7 +344,7 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
       );
 
       return drupal_json_output(array(
-        'preventDefault' => FALSE,
+        'preventUpdate' => FALSE,
         'disableSelector' => $disable_selector,
         'html' => theme('comstack_friends_link', $variables),
         'errors' => '',
@@ -508,6 +508,12 @@ function theme_comstack_friends_link($variables) {
   // And the link text, "request" action is the default.
   switch ($action) {
     case 'friends':
+      // Prevent "Add friend" buttons appearing for users who don't want
+      // to get friend requests.
+      if ($action === 'request' && !user_preferences($requestee_uid, 'comstack_friends_allow_requests')) {
+        return;
+      }
+
       $text = t('Friends');
       $disabled = TRUE;
       break;

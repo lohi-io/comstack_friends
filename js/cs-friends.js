@@ -46,7 +46,8 @@
       var username = currentLink.attr('data-username');
       var ok = settings.comstackFriends.modalStrings.buttons.confirm;
       var cancel = settings.comstackFriends.modalStrings.buttons.cancel;
-      var final_text = Drupal.t(modal_text, {'@username': username}) + '<div class="text-right modal-buttons"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">' + cancel + '</button> <button id="cs-f-modal-ok" class="btn btn-default form-submit">' + ok + '</button></div>';
+      var modal_body = Drupal.t(modal_text, {'@username': username});
+      var modal_footer = '<div class="text-right modal-buttons modal-footer"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">' + cancel + '</button> <button id="cs-f-modal-ok" class="btn btn-default form-submit">' + ok + '</button></div>';
 
       // Trigger the modal.
       var modal_options = {
@@ -56,7 +57,15 @@
 
       // Set the text.
       $('#modal-title').text(title);
-      $('#modal-content').html(final_text);
+
+      // We try and work out if the ctools modal has Bootstrap styling, if so
+      // make use of the footer class for our  buttons.
+      if ($('#modal-content').hasClass('modal-body')) {
+        $('#modal-content').html(modal_body).after(modal_footer);
+      }
+      else {
+        $('#modal-content').html(modal_body + modal_footer);
+      }
 
       // Setup the button callbacks.
       $('#cs-f-modal-cancel').click(modalCancel);
@@ -84,7 +93,8 @@
       var requestee = currentLink.attr('data-requestee-uid');
       var action = currentLink.attr('data-cs-f-action');
 
-      $("a.cs-f-link[data-requester-uid='" + requester + "'][data-requestee-uid='" + requestee + "'][data-cs-f-action='" + action + "']").html(html).click(linkClick);;
+      $("a.cs-f-link[data-requester-uid='" + requester + "'][data-requestee-uid='" + requestee + "'][data-cs-f-action='" + action + "']").replaceWith(html);
+      $('a.cs-f-link:not(.cs-f-processed)').click(linkClick);
     }
 
     function sendRequest() {
@@ -111,7 +121,7 @@
           }
 
           // The response can prevent the clicked link from being updated.
-          if (!data.preventDefault) {
+          if (!data.preventUpdate) {
             updateLink(data.html);
           }
 
@@ -119,7 +129,7 @@
           modalCancel();
         },
         error: function (xmlhttp) {
-          alert('An HTTP error '+ xmlhttp.status +' occurred.\n'+ url);
+          alert('An HTTP error ' + xmlhttp.status + ' occurred.\n' + url);
           modalCancel();
         }
       });
