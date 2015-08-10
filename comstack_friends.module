@@ -204,7 +204,7 @@ function comstack_friends_admin_settings_form() {
   $form['comstack_friends_add_links_to_profiles'] = array(
     '#type' => 'checkbox',
     '#title' => t('Add friend &amp; block links to user profiles'),
-    '#default_value' => variable_get('comstack_friends_add_links_to_profiles', TRUE);
+    '#default_value' => variable_get('comstack_friends_add_links_to_profiles', TRUE),
   );
 
   $form['comstack_friends_opted_out_hide'] = array(
@@ -713,6 +713,5 @@ function comstack_friends_user_view($account, $view_mode, $langcode) {
       '#markup' => '<div class="cs-friends-buttons">' . $output . '</div>',
       '#weight' => -100,
     );
-    dsm($account->content);
   }
 }

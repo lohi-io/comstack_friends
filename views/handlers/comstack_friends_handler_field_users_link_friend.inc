@@ -14,9 +14,14 @@ class comstack_friends_handler_field_users_link_friend extends views_handler_fie
   }
 
   function render($values) {
-    $requester_uid = $this->view->args[0];
+    global $user;
+    $requester_uid = isset($this->view->args[0]) ? $this->view->args[0] : $user->uid;
     $requestee_uid = $this->get_value($values);
     $reqestee_name = $this->get_value($values, 'name');
+
+    if (!$requester_uid) {
+      return;
+    }
 
     $variables = array(
       'type' => 'comstack_friends',
