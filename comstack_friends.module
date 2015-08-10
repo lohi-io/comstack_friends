@@ -29,6 +29,14 @@ function comstack_friends_permission() {
  * Implements hook_menu().
  */
 function comstack_friends_menu() {
+  $items['admin/structure/comstack/settings/friends'] = array(
+    'title' => 'Comstack Friends Settings',
+    'description' => 'Settings relating to the Comstack Friends functionality.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('comstack_friends_admin_settings_form'),
+    'access arguments' => array('administer comstack settings'),
+  );
+
   // /cd-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
   $items['cs-friends/%/%/%/%/%ctools_js'] = array(
     'title' => 'Comstack Friends',
@@ -172,6 +180,37 @@ function comstack_friends_form_views_exposed_form_alter(&$form, $form_state, $fo
 }
 
 /**
+ * Admin area settings form callback.
+ */
+function comstack_friends_admin_settings_form() {
+  $form = array();
+
+  $form['comstack_friends_dissolve_on_block'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('When a user blocks another user, dissolve their friendship'),
+    '#description' => t('When a user blocks another user, if they have a friendship should it be ended?'),
+    '#default_value' => variable_get('comstack_friends_dissolve_on_block', TRUE),
+  );
+
+  $form['comstack_friends_already_friends_hide_button'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide the "Add friend" button if the users are already friends'),
+    '#description' => t('If the users are already friends then a button will be output, but disabled. Check this to hide the button entirely.'),
+    '#default_value' => variable_get('comstack_friends_already_friends_hide_button', TRUE),
+  );
+
+  $form['comstack_friends_exclude_roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Roles to exclude from the Friend &amp; Block functionality'),
+    '#description' => t('You can exclude certain roles from being friended and blocked by selecting them here. This is in addition to whatever permissions have been defined.'),
+    '#options' => drupal_map_assoc(user_roles(TRUE), 'check_plain'),
+    '#default_value' => variable_get('comstack_friends_exclude_roles', array()),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * View access plugin callback.
  */
 function comstack_friends_views_check_perm($bypass_perm, $perm, $account = NULL) {
@@ -288,6 +327,13 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
     return FALSE;
   }
 
+  // Check that neither of the users are excluded from using the friend or
+  // block functionality.
+  $excluded_roles = variable_get('comstack_friends_exclude_roles', array());
+  if (count(array_intersect($requester->roles, $excluded_roles)) > 0 || count(array_intersect($requestee->roles, $excluded_roles)) > 0) {
+    return;
+  }
+
   // Down to it. If we're doing an action which will cause the requestee to
   // have to do something, first check they allow friend requests.
   if ($action === 'request' && !user_preferences($target_uid, 'comstack_friends_allow_requests')) {
@@ -297,6 +343,7 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
 
   // We got the action we got the motion.
   $relationships = comstack_friends_get_relationships($uid);
+  $relationship = NULL;
   // Disable any other buttons that'd do the same action that had just been
   // carried out.
   $disable_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}][data-cs-f-action='{$action}']";
@@ -392,7 +439,7 @@ function comstack_friends_add_link_js() {
         'accept' => FALSE,
         'reject' => FALSE,
         'block' => TRUE,
-        'unblock' => FALSE,
+        'unblock' => TRUE,
       ),
       'modalStrings' => array(
         'request' => array(
@@ -416,9 +463,6 @@ function comstack_friends_add_link_js() {
           'cancel' => t('Cancel'),
         ),
       ),
-      // When a user blocks another user, should we disable any "Add friend" or
-      // "Accept" friend request buttons relating to that user?
-      'onBlockDisableRequestOrAccept' => TRUE,
     ),
   ), 'setting');
 }
@@ -436,6 +480,21 @@ function theme_comstack_friends_link($variables) {
 
   // Prevent any messing with this function.
   if (!is_numeric($requester_uid) || !is_numeric($requestee_uid)) {
+    return;
+  }
+
+  $requester = user_load($requester_uid);
+  $requestee = user_load($requestee_uid);
+  // Check the users have been loaded successfully.
+  if (!$requester || !$requestee) {
+    return;
+  }
+
+  // If we're excluding certain roles from Comstack Friends then rule them out.
+  // We check both the requestee and requester and bail out if either have an
+  // excluded role.
+  $excluded_roles = variable_get('comstack_friends_exclude_roles', array());
+  if (count(array_intersect($requester->roles, $excluded_roles)) > 0 || count(array_intersect($requestee->roles, $excluded_roles)) > 0) {
     return;
   }
 
@@ -541,14 +600,7 @@ function theme_comstack_friends_link($variables) {
 
   // Load the requestee username if it's not been passed to us.
   if (!$requestee_username) {
-    $requestee_user = user_load($requestee_uid);
-
-    if ($requestee_user) {
-      $requestee_username = $requestee_user->name;
-    }
-    else {
-      return;
-    }
+    $requestee_username = $requestee->name;
   }
 
   // Chuck in extra data attributes we want.

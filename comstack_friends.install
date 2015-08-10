@@ -12,4 +12,5 @@ function comstack_friends_uninstall() {
   variable_del('comstack_friends_dissolve_on_block');
   variable_del('comstack_friends_restrict_entity_ref_to_friends');
   variable_del('comstack_friends_already_friends_hide_button');
+  variable_del('comstack_friends_exclude_roles');
 }
