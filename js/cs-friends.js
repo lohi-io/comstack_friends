@@ -47,7 +47,7 @@
       var ok = settings.comstackFriends.modalStrings.buttons.confirm;
       var cancel = settings.comstackFriends.modalStrings.buttons.cancel;
       var modal_body = Drupal.t(modal_text, {'@username': username});
-      var modal_footer = '<div class="text-right modal-buttons modal-footer"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">' + cancel + '</button> <button id="cs-f-modal-ok" class="btn btn-default form-submit">' + ok + '</button></div>';
+      var modal_footer = '<div id="modal-footer" class="text-right modal-buttons modal-footer"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">' + cancel + '</button> <button id="cs-f-modal-ok" class="btn btn-default form-submit">' + ok + '</button></div>';
 
       // Trigger the modal.
       var modal_options = {};
@@ -109,7 +109,14 @@
         success: function (data) {
           // Be prepared to receive an error!
           if (data.errors != '') {
-            $('#modal-content').html('<p>' + data.message + '</p><div class="text-right modal-buttons"><button id="cs-f-modal-cancel" class="btn btn-default form-submit"></button></div>');
+            if ($('#modal-content').hasClass('modal-body')) {
+              $('#modal-content').html('<p>' + data.message + '</p>');
+              $('#modal-footer').html('<div class="text-right modal-buttons"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">Close</button></div>');
+              $('#cs-f-modal-cancel').click(modalCancel);
+            }
+            else {
+              $('#modal-content').html('<p>' + data.message + '</p><div class="text-right modal-buttons"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">Close</button></div>');
+            }
             return;
           }
 

@@ -37,7 +37,7 @@ function comstack_friends_menu() {
     'access arguments' => array('administer comstack settings'),
   );
 
-  // /cd-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
+  // /cs-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
   $items['cs-friends/%/%/%/%/%ctools_js'] = array(
     'title' => 'Comstack Friends',
     'page callback' => 'comstack_friends_link_action_callback',
@@ -116,13 +116,29 @@ function comstack_friends_theme($existing, $type, $theme, $path) {
  * Implements hook_user_relationships_save().
  *
  * When a user blocks another user if they are friends dissolve that
- * friendship. Harsh.
+ * friendship. Harsh. This function seems to get varying levels of detail
+ * so is full of ifs to load in anything that's missing.
  */
 function comstack_friends_user_relationships_save($relationship, $action) {
   $dissolve = variable_get('comstack_friends_dissolve_on_block', TRUE);
 
+  if (!isset($relationship->type)) {
+    $relationship_type = user_relationships_type_load($relationship->rtid);
+
+    if ($relationship_type) {
+      $relationship->type = $relationship_type;
+    }
+  }
+
   if (!empty($relationship->type) && $relationship->type->machine_name === 'comstack_blocked' && $action === 'request' && $dissolve) {
     // Try and find a friendship between these two users.
+    if (!isset($relationship->requester)) {
+      $relationship->requester = user_load($relationship->requester_id);
+    }
+    if (!isset($relationship->requestee)) {
+      $relationship->requestee = user_load($relationship->requestee_id);
+    }
+
     $relationships = user_relationships_load(array('between' => array($relationship->requester->uid, $relationship->requestee->uid)));
 
     if ($relationships) {
@@ -293,7 +309,7 @@ function comstack_friends_action_access_callback($action, $uid, $target_uid, $to
   }
 
   // Default is "request".
-  // /cd-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
+  // /cs-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
   switch ($action) {
     case 'accept':
     case 'reject':
@@ -619,7 +635,7 @@ function theme_comstack_friends_link($variables) {
   }
   // Build the URL.
   else {
-    // cd-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
+    // cs-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
     $token = drupal_get_token("$action$requester_uid$requestee_uid");
     $url = url("cs-friends/$action/$requester_uid/$requestee_uid/$token/nojs");
   }
