@@ -22,7 +22,7 @@ function comstack_friends_context_default_contexts() {
         'friends/*' => 'friends/*',
         'friends/*/pending' => 'friends/*/pending',
         'friends/*/blocked' => 'friends/*/blocked',
-        'friends/*/search' => 'friends/*/search',
+        'friends/*/find' => 'friends/*/find',
       ),
     ),
   );
