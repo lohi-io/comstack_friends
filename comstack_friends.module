@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file
+ * Code for the Communications Stack - Friends feature.
+ */
+
+include_once 'comstack_friends.features.inc';
 
 /**
  * @file
@@ -81,15 +87,6 @@ function comstack_friends_user_preferences() {
         ),
       ),
     ),
-  );
-}
-
-/**
- * Implements hook_views_api().
- */
-function comstack_friends_views_api() {
-  return array(
-    'api' => '3.0',
   );
 }
 

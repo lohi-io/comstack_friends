@@ -47,6 +47,11 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['relationships']['requester_id']['id'] = 'requester_id';
   $handler->display->display_options['relationships']['requester_id']['table'] = 'user_relationships';
   $handler->display->display_options['relationships']['requester_id']['field'] = 'requester_id';
+  /* Relationship: User relationships: RTID */
+  $handler->display->display_options['relationships']['rtid']['id'] = 'rtid';
+  $handler->display->display_options['relationships']['rtid']['table'] = 'user_relationships';
+  $handler->display->display_options['relationships']['rtid']['field'] = 'rtid';
+  $handler->display->display_options['relationships']['rtid']['required'] = TRUE;
   /* Field: User: Name */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -97,29 +102,20 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['filters']['approved']['table'] = 'user_relationships';
   $handler->display->display_options['filters']['approved']['field'] = 'approved';
   $handler->display->display_options['filters']['approved']['value'] = '1';
-  /* Filter criterion: User relationships: Relationship type */
-  $handler->display->display_options['filters']['rtype']['id'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['table'] = 'user_relationships';
-  $handler->display->display_options['filters']['rtype']['field'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['value'] = array(
-    0 => '5',
-  );
-  $handler->display->display_options['filters']['rtype']['expose']['operator_id'] = 'rtype_op';
-  $handler->display->display_options['filters']['rtype']['expose']['label'] = 'Relationship type';
-  $handler->display->display_options['filters']['rtype']['expose']['operator'] = 'rtype_op';
-  $handler->display->display_options['filters']['rtype']['expose']['identifier'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    4 => 0,
-    3 => 0,
-  );
   /* Filter criterion: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['relationship'] = 'requestee_id';
   $handler->display->display_options['filters']['status']['value'] = '1';
+  /* Filter criterion: User relationship types: Machine name */
+  $handler->display->display_options['filters']['machine_name']['id'] = 'machine_name';
+  $handler->display->display_options['filters']['machine_name']['table'] = 'user_relationship_types';
+  $handler->display->display_options['filters']['machine_name']['field'] = 'machine_name';
+  $handler->display->display_options['filters']['machine_name']['relationship'] = 'rtid';
+  $handler->display->display_options['filters']['machine_name']['value'] = array(
+    'comstack_friends' => 'comstack_friends',
+  );
 
   /* Display: Friends */
   $handler = $view->new_display('page', 'Friends', 'page');
@@ -134,7 +130,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['tab_options']['weight'] = '0';
 
   /* Display: Pending */
-  $handler = $view->new_display('page', 'Pending requests', 'page_1');
+  $handler = $view->new_display('page', 'Pending', 'page_1');
   $handler->display->display_options['defaults']['empty'] = FALSE;
   /* No results behavior: Global: Unfiltered text */
   $handler->display->display_options['empty']['area_text_custom']['id'] = 'area_text_custom';
@@ -197,32 +193,23 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['filters']['approved']['table'] = 'user_relationships';
   $handler->display->display_options['filters']['approved']['field'] = 'approved';
   $handler->display->display_options['filters']['approved']['value'] = '0';
-  /* Filter criterion: User relationships: Relationship type */
-  $handler->display->display_options['filters']['rtype']['id'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['table'] = 'user_relationships';
-  $handler->display->display_options['filters']['rtype']['field'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['value'] = array(
-    0 => '5',
-  );
-  $handler->display->display_options['filters']['rtype']['expose']['operator_id'] = 'rtype_op';
-  $handler->display->display_options['filters']['rtype']['expose']['label'] = 'Relationship type';
-  $handler->display->display_options['filters']['rtype']['expose']['operator'] = 'rtype_op';
-  $handler->display->display_options['filters']['rtype']['expose']['identifier'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    4 => 0,
-    3 => 0,
-  );
   /* Filter criterion: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['relationship'] = 'requester_id';
   $handler->display->display_options['filters']['status']['value'] = '1';
+  /* Filter criterion: User relationship types: Machine name */
+  $handler->display->display_options['filters']['machine_name']['id'] = 'machine_name';
+  $handler->display->display_options['filters']['machine_name']['table'] = 'user_relationship_types';
+  $handler->display->display_options['filters']['machine_name']['field'] = 'machine_name';
+  $handler->display->display_options['filters']['machine_name']['relationship'] = 'rtid';
+  $handler->display->display_options['filters']['machine_name']['value'] = array(
+    'comstack_friends' => 'comstack_friends',
+  );
   $handler->display->display_options['path'] = 'friends/%/pending';
   $handler->display->display_options['menu']['type'] = 'tab';
-  $handler->display->display_options['menu']['title'] = 'Pending requests';
+  $handler->display->display_options['menu']['title'] = 'Pending';
   $handler->display->display_options['menu']['weight'] = '2';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
@@ -244,29 +231,20 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['filters']['approved']['table'] = 'user_relationships';
   $handler->display->display_options['filters']['approved']['field'] = 'approved';
   $handler->display->display_options['filters']['approved']['value'] = '1';
-  /* Filter criterion: User relationships: Relationship type */
-  $handler->display->display_options['filters']['rtype']['id'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['table'] = 'user_relationships';
-  $handler->display->display_options['filters']['rtype']['field'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['value'] = array(
-    0 => '4',
-  );
-  $handler->display->display_options['filters']['rtype']['expose']['operator_id'] = 'rtype_op';
-  $handler->display->display_options['filters']['rtype']['expose']['label'] = 'Relationship type';
-  $handler->display->display_options['filters']['rtype']['expose']['operator'] = 'rtype_op';
-  $handler->display->display_options['filters']['rtype']['expose']['identifier'] = 'rtype';
-  $handler->display->display_options['filters']['rtype']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    4 => 0,
-    3 => 0,
-  );
   /* Filter criterion: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['relationship'] = 'requestee_id';
   $handler->display->display_options['filters']['status']['value'] = '1';
+  /* Filter criterion: User relationship types: Machine name */
+  $handler->display->display_options['filters']['machine_name']['id'] = 'machine_name';
+  $handler->display->display_options['filters']['machine_name']['table'] = 'user_relationship_types';
+  $handler->display->display_options['filters']['machine_name']['field'] = 'machine_name';
+  $handler->display->display_options['filters']['machine_name']['relationship'] = 'rtid';
+  $handler->display->display_options['filters']['machine_name']['value'] = array(
+    'comstack_blocked' => 'comstack_blocked',
+  );
   $handler->display->display_options['path'] = 'friends/%/blocked';
   $handler->display->display_options['menu']['type'] = 'tab';
   $handler->display->display_options['menu']['title'] = 'Blocked';
@@ -338,6 +316,16 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['sorts']['created']['table'] = 'users';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  /* Contextual filter: User: Uid */
+  $handler->display->display_options['arguments']['uid']['id'] = 'uid';
+  $handler->display->display_options['arguments']['uid']['table'] = 'users';
+  $handler->display->display_options['arguments']['uid']['field'] = 'uid';
+  $handler->display->display_options['arguments']['uid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['uid']['default_argument_type'] = 'current_user';
+  $handler->display->display_options['arguments']['uid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['uid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['uid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['uid']['not'] = TRUE;
   /* Filter criterion: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
@@ -365,6 +353,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['filters']['comstack_friends_allow_requests']['table'] = 'user_preferences';
   $handler->display->display_options['filters']['comstack_friends_allow_requests']['field'] = 'comstack_friends_allow_requests';
   $handler->display->display_options['filters']['comstack_friends_allow_requests']['value'] = '1';
+  $handler->display->display_options['filters']['comstack_friends_allow_requests']['treat_null_as_default'] = TRUE;
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
