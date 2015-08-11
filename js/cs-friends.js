@@ -58,12 +58,12 @@
 
       // We try and work out if the ctools modal has Bootstrap styling, if so
       // make use of the footer class for our  buttons.
-      if ($('#modal-content').hasClass('modal-body')) {
+      /*if ($('#modal-content').hasClass('modal-body')) {
         $('#modal-content').html(modal_body).after(modal_footer);
       }
-      else {
+      else {*/
         $('#modal-content').html(modal_body + modal_footer);
-      }
+      //}
 
       // Setup the button callbacks.
       $('#cs-f-modal-cancel').click(modalCancel);
@@ -109,14 +109,14 @@
         success: function (data) {
           // Be prepared to receive an error!
           if (data.errors != '') {
-            if ($('#modal-content').hasClass('modal-body')) {
+            /*if ($('#modal-content').hasClass('modal-body')) {
               $('#modal-content').html('<p>' + data.message + '</p>');
               $('#modal-footer').html('<div class="text-right modal-buttons"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">Close</button></div>');
-              $('#cs-f-modal-cancel').click(modalCancel);
             }
-            else {
+            else {*/
               $('#modal-content').html('<p>' + data.message + '</p><div class="text-right modal-buttons"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">Close</button></div>');
-            }
+            //}
+            $('#cs-f-modal-cancel').click(modalCancel);
             return;
           }
 

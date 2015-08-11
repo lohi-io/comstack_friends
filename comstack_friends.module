@@ -701,10 +701,13 @@ function comstack_friends_user_view($account, $view_mode, $langcode) {
     'requester_uid' => $user->uid,
     'requestee_uid' => $account->uid,
     'requestee_username' => $account->name,
-    'classes_array' => array('btn', 'btn-link'),
+    'classes_array' => array('btn'),
   );
   $blocked_variables = $variables;
   $blocked_variables['type'] = 'comstack_blocked';
+  $blocked_variables['classes_array'][] = 'btn-link';
+  $variables['classes_array'][] = 'btn-primary';
+
   $output = theme('comstack_friends_link', $variables) . theme('comstack_friends_link', $blocked_variables);
 
   if ($output) {
