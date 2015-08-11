@@ -74,12 +74,12 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['fields']['comstack_friends_link_friend']['label'] = '';
   $handler->display->display_options['fields']['comstack_friends_link_friend']['element_label_colon'] = FALSE;
   /* Field: User relationships: Comstack Friends user relationship block action link */
-  $handler->display->display_options['fields']['comstack_friends_link_block_1']['id'] = 'comstack_friends_link_block_1';
-  $handler->display->display_options['fields']['comstack_friends_link_block_1']['table'] = 'users';
-  $handler->display->display_options['fields']['comstack_friends_link_block_1']['field'] = 'comstack_friends_link_block';
-  $handler->display->display_options['fields']['comstack_friends_link_block_1']['relationship'] = 'requestee_id';
-  $handler->display->display_options['fields']['comstack_friends_link_block_1']['label'] = '';
-  $handler->display->display_options['fields']['comstack_friends_link_block_1']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['comstack_friends_link_block']['id'] = 'comstack_friends_link_block';
+  $handler->display->display_options['fields']['comstack_friends_link_block']['table'] = 'users';
+  $handler->display->display_options['fields']['comstack_friends_link_block']['field'] = 'comstack_friends_link_block';
+  $handler->display->display_options['fields']['comstack_friends_link_block']['relationship'] = 'requestee_id';
+  $handler->display->display_options['fields']['comstack_friends_link_block']['label'] = '';
+  $handler->display->display_options['fields']['comstack_friends_link_block']['element_label_colon'] = FALSE;
   /* Sort criterion: User: Name */
   $handler->display->display_options['sorts']['name']['id'] = 'name';
   $handler->display->display_options['sorts']['name']['table'] = 'users';
