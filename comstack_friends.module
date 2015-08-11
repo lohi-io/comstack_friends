@@ -183,6 +183,12 @@ function comstack_friends_query_comstack_recipients_alter(QueryAlterableInterfac
 function comstack_friends_form_views_exposed_form_alter(&$form, $form_state, $form_id) {
   // Only alter the exposed filter form for the search view.
   if ($form['#id'] === 'views-exposed-form-comstack-friends-search-page') {
+    global $user;
+    $uid = $user->uid;
+    // Ensure that the action is correct, for some reason this gets messed up
+    // when not on the search URL.
+    $form['#action'] = url("friends/$uid/find");
+
     // Add a class to the form.
     if (empty($form['#attributes']['class'])) {
       $form['#attributes']['class'] = array();
