@@ -23,6 +23,7 @@ function comstack_friends_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Friends';
+  $handler->display->display_options['css_class'] = 'friends-list';
   $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['cache']['type'] = 'none';
@@ -133,7 +134,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['tab_options']['weight'] = '0';
 
   /* Display: Pending */
-  $handler = $view->new_display('page', 'Pending', 'page_1');
+  $handler = $view->new_display('page', 'Pending requests', 'page_1');
   $handler->display->display_options['defaults']['empty'] = FALSE;
   /* No results behavior: Global: Unfiltered text */
   $handler->display->display_options['empty']['area_text_custom']['id'] = 'area_text_custom';
@@ -221,7 +222,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['filters']['status']['value'] = '1';
   $handler->display->display_options['path'] = 'friends/%/pending';
   $handler->display->display_options['menu']['type'] = 'tab';
-  $handler->display->display_options['menu']['title'] = 'Pending';
+  $handler->display->display_options['menu']['title'] = 'Pending requests';
   $handler->display->display_options['menu']['weight'] = '2';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
@@ -287,6 +288,7 @@ function comstack_friends_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Find friends';
+  $handler->display->display_options['css_class'] = 'friends-list';
   $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
@@ -299,6 +301,12 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
+  /* No results behavior: Global: Unfiltered text */
+  $handler->display->display_options['empty']['area_text_custom']['id'] = 'area_text_custom';
+  $handler->display->display_options['empty']['area_text_custom']['table'] = 'views';
+  $handler->display->display_options['empty']['area_text_custom']['field'] = 'area_text_custom';
+  $handler->display->display_options['empty']['area_text_custom']['empty'] = TRUE;
+  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">No users were found.</p>';
   /* Field: User: Name */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
