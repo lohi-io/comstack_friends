@@ -26,6 +26,9 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['css_class'] = 'friends-list';
   $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'comstack_friends_current_perm';
+  $handler->display->display_options['access']['perm'] = 'can have comstack_friends relationships';
+  $handler->display->display_options['access']['bypass_perm'] = 'access other users comstack_friends';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -120,6 +123,10 @@ function comstack_friends_views_default_views() {
 
   /* Display: Friends */
   $handler = $view->new_display('page', 'Friends', 'page');
+  $handler->display->display_options['defaults']['access'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'comstack_friends_current_perm';
+  $handler->display->display_options['access']['perm'] = 'can have comstack_friends relationships';
+  $handler->display->display_options['access']['bypass_perm'] = 'access other users comstack_friends';
   $handler->display->display_options['path'] = 'friends/%/friends';
   $handler->display->display_options['menu']['type'] = 'default tab';
   $handler->display->display_options['menu']['title'] = 'Friends';
@@ -218,6 +225,9 @@ function comstack_friends_views_default_views() {
   /* Display: Blocked */
   $handler = $view->new_display('page', 'Blocked', 'page_2');
   $handler->display->display_options['defaults']['access'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'comstack_friends_current_perm';
+  $handler->display->display_options['access']['perm'] = 'can have comstack_blocked relationships';
+  $handler->display->display_options['access']['bypass_perm'] = 'access other users comstack_blocked';
   $handler->display->display_options['defaults']['empty'] = FALSE;
   /* No results behavior: Global: Unfiltered text */
   $handler->display->display_options['empty']['area_text_custom']['id'] = 'area_text_custom';
