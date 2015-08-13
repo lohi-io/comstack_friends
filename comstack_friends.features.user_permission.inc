@@ -31,7 +31,9 @@ function comstack_friends_user_default_permissions() {
   // Exported permission: 'can request comstack_blocked relationships'.
   $permissions['can request comstack_blocked relationships'] = array(
     'name' => 'can request comstack_blocked relationships',
-    'roles' => array(),
+    'roles' => array(
+      'authenticated user' => 'authenticated user',
+    ),
     'module' => 'user_relationships',
   );
 
@@ -65,7 +67,9 @@ function comstack_friends_user_default_permissions() {
   // Exported permission: 'maintain comstack_blocked relationships'.
   $permissions['maintain comstack_blocked relationships'] = array(
     'name' => 'maintain comstack_blocked relationships',
-    'roles' => array(),
+    'roles' => array(
+      'authenticated user' => 'authenticated user',
+    ),
     'module' => 'user_relationships',
   );
 

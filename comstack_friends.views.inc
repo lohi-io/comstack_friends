@@ -46,4 +46,15 @@ function comstack_friends_views_data_alter(&$data) {
     ),
     'group' => t('User relationships'),
   );
+  $data['users_roles']['comstack_friends_filter_exclude_roles'] = array(
+    'real field' => 'rid',
+    'filter' => array(
+      'title' => t('Comstack Friends exclude roles'),
+      'help' => t('Exclude any users with the role(s) that are not allowed to use Comstack friends functionality.'),
+      'handler' => 'comstack_friends_handler_filter_exclude_roles',
+      'numeric' => TRUE,
+      'allow empty' => FALSE,
+    ),
+    'group' => t('User relationships'),
+  );
 }

@@ -14,6 +14,7 @@ dependencies[] = views
 
 files[] = views/handlers/comstack_friends_handler_field_users_link_block.inc
 files[] = views/handlers/comstack_friends_handler_field_users_link_friend.inc
+files[] = views/handlers/comstack_friends_handler_filter_exclude_roles.inc
 files[] = views/plugins/comstack_friends_plugin_access_current_perm.inc
 
 features[context][] = comstack_friends

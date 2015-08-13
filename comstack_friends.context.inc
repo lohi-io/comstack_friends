@@ -20,8 +20,6 @@ function comstack_friends_context_default_contexts() {
     'path' => array(
       'values' => array(
         'friends/*' => 'friends/*',
-        'friends/*/pending' => 'friends/*/pending',
-        'friends/*/blocked' => 'friends/*/blocked',
         'friends/*/find' => 'friends/*/find',
       ),
     ),
