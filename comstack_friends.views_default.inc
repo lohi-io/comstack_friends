@@ -366,6 +366,10 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['filters']['comstack_friends_allow_requests']['field'] = 'comstack_friends_allow_requests';
   $handler->display->display_options['filters']['comstack_friends_allow_requests']['value'] = '1';
   $handler->display->display_options['filters']['comstack_friends_allow_requests']['treat_null_as_default'] = TRUE;
+  /* Filter criterion: User relationships: Comstack Friends exclude roles */
+  $handler->display->display_options['filters']['comstack_friends_filter_exclude_roles']['id'] = 'comstack_friends_filter_exclude_roles';
+  $handler->display->display_options['filters']['comstack_friends_filter_exclude_roles']['table'] = 'users_roles';
+  $handler->display->display_options['filters']['comstack_friends_filter_exclude_roles']['field'] = 'comstack_friends_filter_exclude_roles';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
