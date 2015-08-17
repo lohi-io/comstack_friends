@@ -217,7 +217,7 @@ function comstack_friends_views_default_views() {
   );
   $handler->display->display_options['path'] = 'friends/%/pending';
   $handler->display->display_options['menu']['type'] = 'tab';
-  $handler->display->display_options['menu']['title'] = 'Pending';
+  $handler->display->display_options['menu']['title'] = 'Pending requests';
   $handler->display->display_options['menu']['weight'] = '2';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
