@@ -170,7 +170,7 @@ function comstack_friends_query_comstack_recipients_alter(QueryAlterableInterfac
       ->condition("$ur_alias.approved", 1);
 
     // Add in username sort for good measure.
-    $query->orderBy('name');
+    $query->orderBy('users.name');
   }
 }
 
