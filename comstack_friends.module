@@ -158,7 +158,12 @@ function comstack_friends_query_comstack_recipients_alter(QueryAlterableInterfac
   // If we want to restrict comstack available recipients by existing
   // friendships then alter the query!
   if (variable_get('comstack_friends_restrict_entity_ref_to_friends', TRUE)) {
-    global $user;
+    $account = $query->getMetaData('account');
+
+    if (!$account) {
+      global $user;
+      $account = $user;
+    }
 
     // Load the friendship type, we'll want the rtid from it for the join.
     $friend_type = user_relationships_type_machine_name_load('comstack_friends');
@@ -166,7 +171,7 @@ function comstack_friends_query_comstack_recipients_alter(QueryAlterableInterfac
     // Add the join which will require that a friendship relationship exists.
     $ur_alias = $query->join('user_relationships', 'ur', 'users.uid = ur.requester_id');
     $query->condition("$ur_alias.rtid", $friend_type->rtid)
-      ->condition("$ur_alias.requestee_id", $user->uid)
+      ->condition("$ur_alias.requestee_id", $account->uid)
       ->condition("$ur_alias.approved", 1);
 
     // Add in username sort for good measure.
