@@ -19,6 +19,7 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
       // A specific entity.
       '^([\d]+)$' => array(
         \RestfulInterface::GET => 'viewEntity',
+        \RestfulInterface::DELETE => 'deleteEntity',
       ),
       // Actions against a specific relationship.
       '^([\d]+)\/approve$' => array(
@@ -26,9 +27,6 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
       ),
       '^([\d]+)\/reject$' => array(
         \RestfulInterface::PUT => 'rejectEntity',
-      ),
-      '^([\d]+)\/delete' => array(
-        \RestfulInterface::PUT => 'deleteEntity',
       ),
       '^([\d]+)\/cancel' => array(
         \RestfulInterface::PUT => 'cancelEntity',
@@ -98,7 +96,6 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
     }
 
     $entity_id = $this->getEntityID();
-    $request_data = $this->getRequestData();
 
     // Grab the controller.
     try {
@@ -136,7 +133,7 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
   /**
    * Cancel an unapproved request.
    */
-  public function cancelEntity($entity_id) {
+  public function cancelEntity() {
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;
@@ -146,6 +143,8 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
       $this->setHttpHeaders('Status', 403);
       throw new RestfulForbiddenException(format_string('You do not have access to delete or reject new @bundle relationships.', $params));
     }
+
+    $entity_id = $this->getEntityID();
 
     // Grab the controller.
     try {
