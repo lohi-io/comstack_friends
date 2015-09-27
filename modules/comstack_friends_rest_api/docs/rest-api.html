@@ -537,7 +537,216 @@
           </table>
         </div>
 
+        <h4 class="text-primary">/blocked</h4>
 
+        <div class="resource-request">
+          <span class="resource-verb get">GET</span> /api/v1/cs-fr/blocked
+          <span class="show-details"><a href="#resource-blocked-get" data-toggle="collapse">Show details</a></span>
+        </div>
+
+        <div id="resource-blocked-get" class="collapse response-details">
+          <blockquote>
+            <p>List the users that the current user has blocked.</p>
+            <p><strong>Requires:</strong> Authenticated user session.</p>
+            <p><strong>Default limit:</strong> 50.</p>
+          </blockquote>
+
+          <h4>Responses</h4>
+
+          <table class="table table-striped responses">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>200</code></td>
+                <td>Valid response.</td>
+                <td>
+<h5>Body</h5>
+<pre>{
+  "data": [
+    {
+      "type": "relationship",
+      "id": 2,
+      "relationship_type": "comstack_blocked",
+      "user": {
+        "type": "user",
+        "id": 3,
+        "name": "username"
+        "avatars": {
+          "100-100": "https://example.com/sites/default/files/styles/cs-100-100/public/avatars/av1.jpg?itok=123",
+          "200-200": "https://example.com/sites/default/files/styles/cs-200-200/public/avatars/av1.jpg?itok=123"
+        },
+        "contact_frequency": 0
+      },
+      "created": "2015-08-03T16:34:58+01:00",
+      "changed": "2015-08-03T16:35:55+01:00",
+    },
+    ...
+  ],
+  "paging": {
+    // See the Comstack Private Messaging documentation for that.
+  }
+}</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>204</code></td>
+                <td colspan="2">No content (you've not blocked anyone).</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+
+        <div class="resource-request">
+          <span class="resource-verb post">POST</span> /api/v1/cs-fr/blocked
+          <span class="show-details"><a href="#resource-blocked-post" data-toggle="collapse">Show details</a></span>
+        </div>
+
+        <div id="resource-blocked-post" class="collapse response-details">
+          <blockquote>
+            <p>Create a new blocked relationship, block someone.</p>
+          </blockquote>
+
+          <h4>Request body</h4>
+
+          <table class="table table-striped request-body">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Required?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>user</td>
+                <td><code>Integer</code></td>
+                <td>The ID of the user you'd like to block.</td>
+                <td><span class="glyphicon glyphicon-ok"></span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h4>Example request body</h4>
+
+<pre>{
+  "user": 3
+}</pre>
+
+          <h4>Responses</h4>
+
+          <table class="table table-striped responses">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>201</code></td>
+                <td>Request sent.</td>
+                <td>
+<h5>Body</h5>
+<pre>{
+  // See relationship model.
+}</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>400</code></td>
+                <td colspan="2">Validation issue, in this case you've not sent a valid ID number.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 class="text-primary">/blocked/{relationship_id}</h4>
+
+        <div class="resource-request">
+          <span class="resource-verb get">GET</span> /api/v1/cs-fr/blocked/{relationship_id}
+          <span class="show-details"><a href="#resource-blocked-specific-get" data-toggle="collapse">Show details</a></span>
+        </div>
+
+        <div id="resource-blocked-specific-get" class="collapse response-details">
+          <blockquote>
+            <p>Get a specific blocked relationship.</p>
+            <p><strong>Requires:</strong> Authenticated user session.</p>
+          </blockquote>
+
+          <h4>Responses</h4>
+           <table class="table table-striped responses">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>200</code></td>
+                <td>Relationship found.</td>
+                <td>
+<h5>Body</h5>
+<pre>{
+  // See relationship model.
+}</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>404</code></td>
+                <td colspan="2">Relationship not found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="resource-request">
+          <span class="resource-verb delete">DELETE</span> /api/v1/cs-fr/blocked/{relationship_id}
+          <span class="show-details"><a href="#resource-blocked-specific-delete" data-toggle="collapse">Show details</a></span>
+        </div>
+
+        <div id="resource-blocked-specific-delete" class="collapse response-details">
+          <blockquote>
+            <p>Delete a blocked relationship, unblock someone.</p>
+          </blockquote>
+
+          <h4>Responses</h4>
+
+          <table class="table table-striped responses">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>200</code></td>
+                <td colspan="2">The relationship has been deleted.</td>
+              </tr>
+              <tr>
+                <td><code>400</code></td>
+                <td colspan="2">Failed to delete relationship.</td>
+              </tr>
+              <tr>
+                <td><code>404</code></td>
+                <td colspan="2">Relationship not found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <a name="models"></a>
         <h3>Models</h3>
