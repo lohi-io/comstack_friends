@@ -200,6 +200,10 @@
         <p>The API will live at <code>/api/v1/cs-fr</code> on the installed site.</p>
 
 
+        <h4>Examples</h4>
+
+
+        <p>See the end of this document.</p>
 
         <a name="endpoints"></a>
         <h3>Endpoints</h3>
@@ -816,6 +820,18 @@
   "approved": true
 }</pre>
 </div>
+
+        <a name="examples"></a>
+        <h3>Examples</h3>
+
+        <p>Get me a list of my friends:</p>
+        <pre>GET /api/v1/cs-fr/friends?filter[approved]=1</pre>
+
+        <p>Get me a list of pending friend requests for me to approve or reject:</p>
+        <pre>GET /api/v1/cs-fr/friends?filter[approved]=0</pre>
+
+        <p>Check to see if I'm friends with someone, where their user ID is <code>9</code>:</p>
+        <pre>GET /api/v1/cs-fr/friends?filter[user]=9</pre>
 
       </div>
     </div>
