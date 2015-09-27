@@ -164,7 +164,13 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       throw new \RestfulBadRequestException(format_string("When requesting a relationship with someone you need to send a valid user ID. @data", array('@data' => print_r($request_data, TRUE) )));
     }
 
-    $relationship = entity_get_controller($this->entityType, $account)->request($request_data['user'], $bundle);
+    try {
+      $relationship = entity_get_controller($this->entityType, $account)->request($request_data['user'], $bundle);
+    }
+    catch (Exception $e) {
+      $this->setHttpHeaders('Status', 400);
+      throw new RestfulException(format_string('An error occurred, @message.', array('@message' => $e->getMessage())));
+    }
 
     if ($relationship) {
       $this->setHttpHeaders('Status', 201);
@@ -199,7 +205,12 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       throw new RestfulForbiddenException(format_string('You do not have access to delete or reject new @bundle relationships.', $params));
     }
 
-    // Grab the controller.
-    $this->deleteRelationship($entity_id, 'remove');
+    try {
+      $this->deleteRelationship($entity_id, 'remove');
+    }
+    catch (Exception $e) {
+      $this->setHttpHeaders('Status', 400);
+      throw new RestfulException(format_string('An error occurred, @message.', array('@message' => $e->getMessage())));
+    }
   }
 }

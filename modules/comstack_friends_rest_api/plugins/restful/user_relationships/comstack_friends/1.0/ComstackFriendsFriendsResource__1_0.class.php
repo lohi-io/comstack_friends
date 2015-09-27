@@ -19,14 +19,19 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
       // A specific entity.
       '^([\d]+)$' => array(
         \RestfulInterface::GET => 'viewEntity',
-        \RestfulInterface::DELETE => 'deleteEntity',
       ),
       // Actions against a specific relationship.
       '^([\d]+)\/approve$' => array(
         \RestfulInterface::PUT => 'approveEntity',
       ),
       '^([\d]+)\/reject$' => array(
-        \RestfulInterface::POST => 'rejectEntity',
+        \RestfulInterface::PUT => 'rejectEntity',
+      ),
+      '^([\d]+)\/delete' => array(
+        \RestfulInterface::PUT => 'deleteEntity',
+      ),
+      '^([\d]+)\/cancel' => array(
+        \RestfulInterface::PUT => 'cancelEntity',
       ),
     );
   }
@@ -46,6 +51,9 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
 
   /**
    * Approve a relationship request.
+   *
+   * @throws RestfulForbiddenException.
+   * @throws RestfulException.
    */
   public function approveEntity() {
     // Check access.
@@ -60,9 +68,16 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
 
     $entity_id = $this->getEntityID();
 
-    if (entity_get_controller($this->entityType, $account)->accept($entity_id)) {
-      $this->clearResourceRenderedCacheEntity($entity_id);
-      return $this->viewEntity($entity_id);
+    // Approve the relationship.
+    try {
+      if (entity_get_controller($this->entityType, $account)->accept($entity_id)) {
+        $this->clearResourceRenderedCacheEntity($entity_id);
+        return $this->viewEntity($entity_id);
+      }
+    }
+    catch (Exception $e) {
+      $this->setHttpHeaders('Status', 400);
+      throw new RestfulException(format_string('An error occurred, @message.', array('@message' => $e->getMessage())));
     }
 
     return FALSE;
@@ -85,18 +100,60 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
     $entity_id = $this->getEntityID();
     $request_data = $this->getRequestData();
 
-    // Set the default reason as "disapprove".
-    if (empty($request_data['reason'])) {
-      $request_data['reason'] = 'disapprove';
+    // Grab the controller.
+    try {
+      $this->deleteRelationship($entity_id, 'disapprove');
+    }
+    catch (Exception $e) {
+      $this->setHttpHeaders('Status', 400);
+      throw new RestfulException(format_string('An error occurred, @message.', array('@message' => $e->getMessage())));
+    }
+  }
+
+  /**
+   * Delete a relationship.
+   */
+  public function deleteEntity($entity_id) {
+    // Check access.
+    $account = $this->getAccount();
+    $bundle = $this->bundle;
+
+    if (!$this->checkEntityAccess('delete')) {
+      $params = array('@bundle' => $bundle);
+      $this->setHttpHeaders('Status', 403);
+      throw new RestfulForbiddenException(format_string('You do not have access to delete or reject new @bundle relationships.', $params));
     }
 
-    // Validate the request has all the data we need.
-    if (!is_string($request_data['reason']) || is_string($request_data['reason']) && !in_array($request_data['reason'], array('cancel', 'disapprove'))) {
+    try {
+      $this->deleteRelationship($entity_id, 'remove');
+    }
+    catch (Exception $e) {
       $this->setHttpHeaders('Status', 400);
-      throw new \RestfulBadRequestException(format_string('If you want to reject this relationship you need to set a reason. @data', array('@data' => print_r($request_data, TRUE) )));
+      throw new RestfulException(format_string('An error occurred, @message.', array('@message' => $e->getMessage())));
+    }
+  }
+
+  /**
+   * Cancel an unapproved request.
+   */
+  public function cancelEntity($entity_id) {
+    // Check access.
+    $account = $this->getAccount();
+    $bundle = $this->bundle;
+
+    if (!$this->checkEntityAccess('delete')) {
+      $params = array('@bundle' => $bundle);
+      $this->setHttpHeaders('Status', 403);
+      throw new RestfulForbiddenException(format_string('You do not have access to delete or reject new @bundle relationships.', $params));
     }
 
     // Grab the controller.
-    $this->deleteRelationship($entity_id, $request_data['reason']);
+    try {
+      $this->deleteRelationship($entity_id, 'cancel');
+    }
+    catch (Exception $e) {
+      $this->setHttpHeaders('Status', 400);
+      throw new RestfulException(format_string('An error occurred, @message.', array('@message' => $e->getMessage())));
+    }
   }
 }
