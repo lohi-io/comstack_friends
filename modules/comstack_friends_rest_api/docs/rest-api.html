@@ -364,47 +364,12 @@
             <tbody>
               <tr>
                 <td><code>200</code></td>
-                <td>Content found.</td>
+                <td>Relationship found.</td>
                 <td>
 <h5>Body</h5>
 <pre>{
   // See relationship model.
 }</pre>
-                </td>
-              </tr>
-              <tr>
-                <td><code>404</code></td>
-                <td colspan="2">Content not found.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="resource-request">
-          <span class="resource-verb delete">DELETE</span> /api/v1/cs-fr/friends/{relationship_id}
-          <span class="show-details"><a href="#resource-friends-specific-delete" data-toggle="collapse">Show details</a></span>
-        </div>
-
-        <div id="resource-friends-specific-delete" class="collapse response-details">
-          <blockquote>
-            <p>Delete a specific relationship.</p>
-            <p><strong>Requires:</strong> Authenticated user session.</p>
-          </blockquote>
-
-          <h4>Responses</h4>
-           <table class="table table-striped responses">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Description</th>
-                <th>Example</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>200</code></td>
-                <td>Relationship deleted.</td>
-                <td>
                 </td>
               </tr>
               <tr>
@@ -440,12 +405,15 @@
             <tbody>
               <tr>
                 <td><code>200</code></td>
-                <td>Request approved!</td>
-                <td></td>
+                <td colspan="2">The relationship has been approved.</td>
+              </tr>
+              <tr>
+                <td><code>400</code></td>
+                <td colspan="2">Failed to approve relationship.</td>
               </tr>
               <tr>
                 <td><code>404</code></td>
-                <td colspan="2">Request not found.</td>
+                <td colspan="2">Relationship not found.</td>
               </tr>
             </tbody>
           </table>
@@ -456,11 +424,11 @@
         <h4 class="text-primary">/friends/{relationship_id}/reject</h4>
 
         <div class="resource-request">
-          <span class="resource-verb get">GET</span> /api/v1/cs-fr/friends/{relationship_id}/reject
-          <span class="show-details"><a href="#resource-friends-specific-reject-post" data-toggle="collapse">Show details</a></span>
+          <span class="resource-verb put">PUT</span> /api/v1/cs-fr/friends/{relationship_id}/reject
+          <span class="show-details"><a href="#resource-friends-specific-reject-put" data-toggle="collapse">Show details</a></span>
         </div>
 
-        <div id="resource-friends-specific-reject-post" class="collapse response-details">
+        <div id="resource-friends-specific-reject-put" class="collapse response-details">
           <blockquote>
             <p>Reject a friend request.</p>
             <p><strong>Requires:</strong> Authenticated user session.</p>
@@ -478,38 +446,46 @@
             <tbody>
               <tr>
                 <td><code>200</code></td>
-                <td>An array of messages.</td>
-                <td>
-<pre>{
-  "data": [
-    {
-      "type": "message",
-      "id": 1,
-      "message_type": "comstack_pm",
-      "conversation_id": 1,
-      "sender": {
-        "type": "user",
-        "id": 1,
-        "name": "username",
-        "avatars": [
-          "100-100": "https://example.com/sites/default/files/styles/cs-100-100/public/avatars/av1.jpg?itok=123",
-          "200-200": "https://example.com/sites/default/files/styles/cs-200-200/public/avatars/av1.jpg?itok=123"
-        ]
-      },
-      "sent": "2015-01-15T12:24:47+0000",
-      "updated": "2015-01-15T12:24:47+0000",
-      "text": "Blah blah...",
-      "weight": 0,
-      "edits": 0,
-      "deleted": false
-    },
-    ...
-  ],
-  "paging": {
-    // See the top of this document for details on pagination.
-  }
-}</pre>
-                </td>
+                <td colspan="2">The friend request has been rejected.</td>
+              </tr>
+              <tr>
+                <td><code>400</code></td>
+                <td colspan="2">Failed to reject the request.</td>
+              </tr>
+              <tr>
+                <td><code>404</code></td>
+                <td colspan="2">Request not found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 class="text-primary">/friends/{relationship_id}/cancel</h4>
+
+        <div class="resource-request">
+          <span class="resource-verb put">PUT</span> /api/v1/cs-fr/friends/{relationship_id}/cancel
+          <span class="show-details"><a href="#resource-friends-specific-cancel-put" data-toggle="collapse">Show details</a></span>
+        </div>
+
+        <div id="resource-friends-specific-cancel-put" class="collapse response-details">
+          <blockquote>
+            <p>Cancel a friend request.</p>
+            <p><strong>Requires:</strong> Authenticated user session.</p>
+          </blockquote>
+
+          <h4>Responses</h4>
+           <table class="table table-striped responses">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>200</code></td>
+                <td colspan="2">A friend request has been cancelled.</td>
               </tr>
               <tr>
                 <td><code>204</code></td>
@@ -523,6 +499,44 @@
           </table>
         </div>
 
+        <h4 class="text-primary">/friends/{relationship_id}/delete</h4>
+
+        <div class="resource-request">
+          <span class="resource-verb put">PUT</span> /api/v1/cs-fr/friends/{relationship_id}/delete
+          <span class="show-details"><a href="#resource-friends-specific-delete-put" data-toggle="collapse">Show details</a></span>
+        </div>
+
+        <div id="resource-friends-specific-delete-put" class="collapse response-details">
+          <blockquote>
+            <p>Delete a friend relationship.</p>
+            <p><strong>Requires:</strong> Authenticated user session.</p>
+          </blockquote>
+
+          <h4>Responses</h4>
+           <table class="table table-striped responses">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>200</code></td>
+                <td colspan="2">The relationship has been deleted.</td>
+              </tr>
+              <tr>
+                <td><code>400</code></td>
+                <td colspan="2">Failed to delete relationship.</td>
+              </tr>
+              <tr>
+                <td><code>404</code></td>
+                <td colspan="2">Relationship not found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
 
         <a name="models"></a>
