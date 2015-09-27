@@ -19,6 +19,7 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
       // A specific entity.
       '^([\d]+)$' => array(
         \RestfulInterface::GET => 'viewEntity',
+        \RestfulInterface::DELETE => 'deleteEntity',
       ),
       // Actions against a specific relationship.
       '^([\d]+)\/approve$' => array(
