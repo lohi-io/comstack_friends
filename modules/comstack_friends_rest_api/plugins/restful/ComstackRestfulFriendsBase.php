@@ -307,7 +307,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
 
     try {
       $controller = entity_get_controller($this->entityType);
-      $controller->setAccount($account)
+      $controller->setAccount($account);
       $relationship = $controller->request($request_data['user'], $bundle);
     }
     catch (Exception $e) {
