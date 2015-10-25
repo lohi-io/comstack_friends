@@ -143,6 +143,147 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
   }
 
   /**
+   * Overrides \ComstackRestfulEntityBase::isValidEntity().
+   */
+  protected function isValidEntity($op, $entity_id) {
+    $entity_type = $this->entityType;
+
+    $params = array(
+      '@id' => $entity_id,
+      '@resource' => $this->getPluginKey('label'),
+    );
+
+    if (!$entity = user_relationships_entity_load($entity_id, $this->getAccount())) {
+      if (!$this->isListRequest()) {
+        throw new RestfulNotFoundException(format_string('The entity ID @id for @resource does not exist.', $params));
+      }
+      else {
+        return FALSE;
+      }
+    }
+
+    list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+
+    $resource_bundle = $this->getBundle();
+    if ($resource_bundle && $bundle != $resource_bundle) {
+      throw new RestfulUnprocessableEntityException(format_string('The entity ID @id is not a valid @resource.', $params));
+    }
+
+    if ($this->checkEntityAccess($op, $entity_type, $entity) === FALSE) {
+
+      if ($op == 'view' && !$this->getPath()) {
+        // Just return FALSE, without an exception, for example when a list of
+        // entities is requested, and we don't want to fail all the list because
+        // of a single item without access.
+        return FALSE;
+      }
+
+      // Entity was explicitly requested so we need to throw an exception.
+      throw new RestfulForbiddenException(format_string('You do not have access to entity ID @id of resource @resource', $params));
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Overrides \ComstackRestfulEntityBase::viewEntity().
+   */
+  public function viewEntity($id) {
+    $entity_id = $this->getEntityIdByFieldId($id);
+    $request = $this->getRequest();
+
+    $cached_data = $this->getRenderedCache($this->getEntityCacheTags($entity_id));
+    if (!empty($cached_data->data)) {
+      return $cached_data->data;
+    }
+
+    if (!$this->isValidEntity('view', $entity_id)) {
+      return;
+    }
+
+    $entity = user_relationships_entity_load($entity_id, $this->getAccount());
+    $wrapper = entity_metadata_wrapper($this->entityType, $entity);
+    $wrapper->language($this->getLangCode());
+    $values = array();
+
+    $limit_fields = !empty($request['fields']) ? explode(',', $request['fields']) : array();
+
+    foreach ($this->getPublicFields() as $public_field_name => $info) {
+      if ($limit_fields && !in_array($public_field_name, $limit_fields)) {
+        // Limit fields doesn't include this property.
+        continue;
+      }
+
+      $value = NULL;
+
+      if ($info['create_or_update_passthrough']) {
+        // The public field is a dummy one, meant only for passing data upon
+        // create or update.
+        continue;
+      }
+
+      if ($info['callback']) {
+        $value = static::executeCallback($info['callback'], array($wrapper));
+      }
+      else {
+        // Exposing an entity field.
+        $property = $info['property'];
+        $sub_wrapper = $info['wrapper_method_on_entity'] ? $wrapper : $wrapper->{$property};
+
+        // Check user has access to the property.
+        if ($property && !$this->checkPropertyAccess('view', $public_field_name, $sub_wrapper, $wrapper)) {
+          continue;
+        }
+
+        if (empty($info['formatter'])) {
+          if ($sub_wrapper instanceof EntityListWrapper) {
+            // Multiple values.
+            foreach ($sub_wrapper as $item_wrapper) {
+              $value[] = $this->getValueFromProperty($wrapper, $item_wrapper, $info, $public_field_name);
+            }
+          }
+          else {
+            // Single value.
+            $value = $this->getValueFromProperty($wrapper, $sub_wrapper, $info, $public_field_name);
+          }
+        }
+        else {
+          // Get value from field formatter.
+          $value = $this->getValueFromFieldFormatter($wrapper, $sub_wrapper, $info);
+        }
+
+        // Force the PHP variable type, if the type has been set in the field
+        // or property info.
+        if (!is_null($value)) {
+          $item_info = $sub_wrapper->info();
+          $item_type = !empty($item_info['type']) ? $item_info['type'] : NULL;
+
+          if (isset($info['wrapper_method']) && $info['wrapper_method'] === 'getIdentifier' || $item_type === 'integer') {
+            $value = (int) $value;
+          }
+          elseif ($item_type === 'boolean') {
+            $value = (boolean) $value;
+          }
+          elseif ($item_type === 'decimal') {
+            $value = (float) $value;
+          }
+        }
+      }
+
+      if ($value && $info['process_callbacks']) {
+        foreach ($info['process_callbacks'] as $process_callback) {
+          $value = static::executeCallback($process_callback, array($value));
+        }
+      }
+
+      $values[$public_field_name] = $value;
+    }
+
+    $this->setRenderedCache($values, $this->getEntityCacheTags($entity_id));
+    return $values;
+  }
+
+  /**
    * Create a new relationship request.
    */
   public function newRequest() {
@@ -165,7 +306,9 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
     }
 
     try {
-      $relationship = entity_get_controller($this->entityType, $account)->request($request_data['user'], $bundle);
+      $controller = entity_get_controller($this->entityType);
+      $controller->setAccount($account)
+      $relationship = $controller->request($request_data['user'], $bundle);
     }
     catch (Exception $e) {
       $this->setHttpHeaders('Status', 400);
@@ -184,7 +327,8 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
    */
   public function deleteRelationship($rid, $reason) {
     $account = $this->getAccount();
-    $controller = entity_get_controller($this->entityType, $account);
+    $controller = entity_get_controller($this->entityType);
+    $controller->setAccount($account);
     $controller->setReason($reason);
     $controller->delete(array($rid));
   }

@@ -11,4 +11,5 @@ dependencies[] = user_preferences
 dependencies[] = restful
 dependencies[] = entity_validator
 
+files[] = includes/exceptions/ComstackFriendsRequestNotAllowed.php
 files[] = plugins/restful/ComstackRestfulFriendsBase.php

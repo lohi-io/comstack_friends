@@ -677,7 +677,7 @@ function theme_comstack_friends_link($variables) {
 /**
  * Implements hook_user_view().
  */
-function comstack_friends_user_view($account, $view_mode, $langcode) {
+function comstack_friends_user_view($account, $view_mode, $langcode = NULL) {
   global $user;
 
   // Check we want to add links.

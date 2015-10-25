@@ -48,6 +48,18 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
   }
 
   /**
+   * Overrides \ComstackFriendsRestfulBase::newRequest().
+   */
+  public function newRequest() {
+    // Check that the target user is accepting requests.
+    if (!user_preferences($request_data['user'], 'comstack_friends_allow_requests')) {
+      throw new \ComstackFriendsRequestNotAllowed();
+    }
+
+    return parent::newRequest();
+  }
+
+  /**
    * Approve a relationship request.
    *
    * @throws RestfulForbiddenException.
