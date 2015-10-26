@@ -606,6 +606,7 @@ function theme_comstack_friends_link($variables) {
   }
 
   // And the link text, "request" action is the default.
+  $icon = NULL;
   switch ($action) {
     case 'friends':
       // Prevent "Add friend" buttons appearing for users who don't want
@@ -629,6 +630,7 @@ function theme_comstack_friends_link($variables) {
       break;
     case 'block':
       $text = t('Block');
+      $icon = '<span class="glyphicon glyphicon-ban-circle"></span>';
       break;
     case 'unblock':
       $text = t('Unblock');
@@ -636,6 +638,7 @@ function theme_comstack_friends_link($variables) {
     // request.
     default:
       $text = t('Add friend');
+      $icon = '<span class="glyphicon glyphicon-plus"></span>';
       break;
   }
 
@@ -669,6 +672,7 @@ function theme_comstack_friends_link($variables) {
   $variables['classes_array'][] = 'cs-f-' . $action;
   $attributes['class'] = $variables['classes_array'];
 
+  $text = $icon ? "$icon $text" : $text;
   $output = '<a href="' . $url . '"' . drupal_attributes($attributes) . '>' . $text . '</a>';
 
   return isset($omit_wrapper) && $omit_wrapper ? $output : '<span class="cs-f-link-wrapper">' . $output . '</span>';
@@ -708,6 +712,7 @@ function comstack_friends_user_view($account, $view_mode, $langcode = NULL) {
   }
 
   // Output some buttons.
+  $buttons = array();
   $variables = array(
     'type' => 'comstack_friends',
     'requester_uid' => $user->uid,
@@ -718,12 +723,22 @@ function comstack_friends_user_view($account, $view_mode, $langcode = NULL) {
   $blocked_variables = $variables;
   $blocked_variables['type'] = 'comstack_blocked';
 
-  $output = theme('comstack_friends_link', $variables) . theme('comstack_friends_link', $blocked_variables);
+  $buttons['friend_button'] = theme('comstack_friends_link', $variables);
+  $buttons['block_button'] = theme('comstack_friends_link', $blocked_variables);
 
-  if ($output) {
+  $context = array(
+    'account' => $account,
+    'view_mode' => $view_mode,
+  );
+  drupal_alter('comstack_friends_buttons', $buttons, $context);
+
+  // Remove empty array values.
+  $buttons = array_filter($buttons);
+
+  if (!empty($buttons)) {
     $account->content['comstack_friends'] = array(
       '#type' => 'markup',
-      '#markup' => '<div class="cs-friends-buttons">' . $output . '</div>',
+      '#markup' => '<div class="cs-friends-buttons">' . implode(' ', $buttons) . '</div>',
       '#weight' => -100,
     );
   }

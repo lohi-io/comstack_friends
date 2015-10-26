@@ -153,7 +153,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       '@resource' => $this->getPluginKey('label'),
     );
 
-    if (!$entity = user_relationships_entity_load($entity_id, $this->getAccount())) {
+    if (!$entity = user_relationships_entity__load($entity_id, $this->getAccount())) {
       if (!$this->isListRequest()) {
         throw new RestfulNotFoundException(format_string('The entity ID @id for @resource does not exist.', $params));
       }
@@ -201,7 +201,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       return;
     }
 
-    $entity = user_relationships_entity_load($entity_id, $this->getAccount());
+    $entity = user_relationships_entity__load($entity_id, $this->getAccount());
     $wrapper = entity_metadata_wrapper($this->entityType, $entity);
     $wrapper->language($this->getLangCode());
     $values = array();
