@@ -28,7 +28,7 @@ class comstack_friends_handler_field_users_link_block extends views_handler_fiel
       'requester_uid' => $requester_uid,
       'requestee_uid' => $requestee_uid,
       'requestee_username' => $reqestee_name,
-      'classes_array' => array('btn', 'btn-link'),
+      'classes_array' => array('btn', 'btn-primary'),
     );
 
     return theme('comstack_friends_link', $variables);

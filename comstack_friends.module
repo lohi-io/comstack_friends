@@ -425,7 +425,7 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
         'requester_uid' => $uid,
         'requestee_uid' => $target_uid,
         'requestee_username' => $requestee->name,
-        'classes_array' => array('btn', 'btn-link'),
+        'classes_array' => array('btn', 'btn-primary'),
         'omit_wrapper' => TRUE,
       );
 
@@ -591,13 +591,8 @@ function theme_comstack_friends_link($variables) {
     }
   }
   else {
-    // The current user has been blocked by the target user, so they can't do
-    // anything.
-    if (isset($relationships['comstack_blocked'][$requestee_uid]) && $relationships['comstack_blocked'][$requestee_uid]->requester_id == $requestee_uid) {
-      return;
-    }
     // User hasn't blocked, so has the option to block them.
-    elseif (!isset($relationships['comstack_blocked'][$requestee_uid])) {
+    if (!isset($relationships['comstack_blocked'][$requestee_uid])) {
       $action = 'block';
     }
     elseif (isset($relationships['comstack_blocked'][$requestee_uid]) && $relationships['comstack_blocked'][$requestee_uid]->requester_id == $requester_uid) {
