@@ -7,6 +7,19 @@
 
 class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
   /**
+   * Load a relationship.
+   */
+  public function __load($id) {
+    $account = $this->getAccount();
+
+    $controller = entity_get_controller('user_relationships');
+    $controller->setAccount($account);
+
+    $entities = $controller->load(array($id));
+    return !empty($entities) ? reset($entities) : NULL;
+  }
+
+  /**
    * Overrides \RestfulEntityBase::controllersInfo().
    */
   public static function controllersInfo() {
@@ -124,15 +137,12 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
 
     switch ($op) {
       case 'view':
-        return user_access("view own $bundle relationships", $account);
+      case 'approve':
+        return user_access("can have $bundle relationships", $account);
         break;
 
       case 'request':
         return user_access("can request $bundle relationships", $account);
-        break;
-
-      case 'approve':
-        return user_access("can have $bundle relationships", $account);
         break;
 
         // Delete is synonymous with reject.
@@ -153,7 +163,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       '@resource' => $this->getPluginKey('label'),
     );
 
-    if (!$entity = user_relationships_entity__load($entity_id, $this->getAccount())) {
+    if (!$entity = $this->__load($entity_id)) {
       if (!$this->isListRequest()) {
         throw new RestfulNotFoundException(format_string('The entity ID @id for @resource does not exist.', $params));
       }
@@ -201,7 +211,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       return;
     }
 
-    $entity = user_relationships_entity__load($entity_id, $this->getAccount());
+    $entity = $this->__load($entity_id);
     $wrapper = entity_metadata_wrapper($this->entityType, $entity);
     $wrapper->language($this->getLangCode());
     $values = array();
