@@ -125,6 +125,14 @@
             $(data.disableSelector, context).attr('disabled', 'disabled');
           }
 
+          // Or maybe remove a few things...
+          if (data.removeSelector && data.removeSelector != '') {
+            $(data.removeSelector, context).each(function(){
+              $(this).parent().parent().find('a').attr('disabled', 'disabled');
+              $(this).closest('.media,.views-row').fadeTo('fast', 0.3);
+            });
+          }
+
           // The response can prevent the clicked link from being updated.
           if (!data.preventUpdate) {
             updateLink(data.html);
