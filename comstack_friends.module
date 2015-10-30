@@ -119,7 +119,7 @@ function comstack_friends_theme($existing, $type, $theme, $path) {
 function comstack_friends_user_relationships_save($relationship, $action) {
   $dissolve = variable_get('comstack_friends_dissolve_on_block', TRUE);
 
-  if (!isset($relationship->type)) {
+  if (empty($relationship->type)) {
     $relationship_type = user_relationships_type_load($relationship->rtid);
 
     if ($relationship_type) {
