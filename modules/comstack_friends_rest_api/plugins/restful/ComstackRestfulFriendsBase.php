@@ -198,7 +198,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
   /**
    * Overrides \ComstackRestfulEntityBase::viewEntity().
    */
-  public function viewEntity($id) {
+  public function viewEntity($id, $relationship = NULL) {
     $entity_id = $this->getEntityIdByFieldId($id);
     $request = $this->getRequest();
 
@@ -207,11 +207,11 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       return $cached_data->data;
     }
 
-    if (!$this->isValidEntity('view', $entity_id)) {
+    if (!$relationship && !$this->isValidEntity('view', $entity_id)) {
       return;
     }
 
-    $entity = $this->__load($entity_id);
+    $entity = $relationship ? $relationship : $this->__load($entity_id);
     $wrapper = entity_metadata_wrapper($this->entityType, $entity);
     $wrapper->language($this->getLangCode());
     $values = array();
@@ -329,7 +329,7 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
       $this->setHttpHeaders('Status', 201);
     }
 
-    return $this->viewEntity($relationship->rid);
+    return $this->viewEntity($relationship->rid, $relationship);
   }
 
   /**
