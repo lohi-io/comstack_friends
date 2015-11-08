@@ -50,7 +50,13 @@
       var modal_footer = '<div id="modal-footer" class="text-right modal-buttons modal-footer"><button id="cs-f-modal-cancel" class="btn btn-default form-submit">' + cancel + '</button> <button id="cs-f-modal-ok" class="btn btn-default form-submit">' + ok + '</button></div>';
 
       // Trigger the modal.
-      var modal_options = {};
+      var modal_options = {
+        modalSize: {
+          type: 'fixed',
+          width: 300,
+          height: 200
+        }
+      };
       Drupal.CTools.Modal.show(modal_options);
 
       // Set the text.
