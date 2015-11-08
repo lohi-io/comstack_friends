@@ -139,6 +139,13 @@
             });
           }
 
+          // Enable stuff.
+          if (data.enableSelector && data.enableSelector != '') {
+            $(data.enableSelector, context).each(function(){
+              $(this).parent().parent().find('a').removeAttr('disabled').removeClass('btn-disabled');
+            });
+          }
+
           // The response can prevent the clicked link from being updated.
           if (!data.preventUpdate) {
             updateLink(data.html);
