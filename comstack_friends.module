@@ -68,7 +68,7 @@ function comstack_friends_user_preferences() {
       // The form_item will pass whatever on to the form specified in the
       // previous index.
       'form_item' => array(
-        '#title' => t('Allow other users to send me friend requests?'),
+        '#title' => t('Allow people to send me friend requests.'),
         '#type' => 'checkbox',
         '#weight' => 1,
       ),
@@ -385,6 +385,12 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
   // We got the action we got the motion.
   $relationships = comstack_friends_get_relationships($uid);
   $relationship = NULL;
+
+  if ($action === 'block' || $action === 'unblock') {
+    $blocked_relationships = user_relationships_load(array('requester_id' => $requester->uid, 'requestee_id' => $requestee->uid, 'rtid' =>$relationship_type->rtid));
+    $blocked_relationship = !empty($blocked_relationships) ? reset($blocked_relationships) : NULL;
+  }
+
   // Disable any other buttons that'd do the same action that had just been
   // carried out.
   $disable_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}][data-cs-f-action='{$action}']";
@@ -409,7 +415,7 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
     user_relationships_delete_relationship($relationships['comstack_friends'][$target_uid], $requester, 'disapprove');
     $remove_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}][data-cs-f-action='{$action}']";
   }
-  elseif ($action === 'block' && !isset($relationships['comstack_blocked'][$target_uid])) {
+  elseif ($action === 'block' && !$blocked_relationship) {
     // Block the user.
     $relationship = user_relationships_request_relationship($requester, $requestee, $relationship_type);
     $assign_type = TRUE;
@@ -417,9 +423,9 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
     $disable_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}]";
     $remove_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}][data-cs-f-action='{$action}']";
   }
-  elseif ($action === 'unblock' && isset($relationships['comstack_blocked'][$target_uid])) {
-    $relationship = $relationships['comstack_blocked'][$target_uid];
-    user_relationships_delete_relationship($relationships['comstack_blocked'][$target_uid], $requester, 'remove');
+  elseif ($action === 'unblock' && $blocked_relationship) {
+    $relationship = $blocked_relationship;
+    user_relationships_delete_relationship($blocked_relationship, $requester, 'remove');
     $remove_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}][data-cs-f-action='{$action}']";
     $enable_selector = "a.cs-f-link[data-requester-uid={$uid}][data-requestee-uid={$target_uid}][data-cs-f-action='request']";
   }
@@ -445,7 +451,7 @@ function comstack_friends_link_action_callback($action, $uid, $target_uid, $js =
       );
       $updated_html = theme('comstack_friends_link', $variables);
 
-      if ($action === 'accept' && !$updated_html && module_exists('comstack_pm_ui')) {
+      if ($action === 'accept' && module_exists('comstack_pm_ui')) {
         $updated_html = theme('comstack_pm_ui_message_button', array('account' => $requestee));
       }
 
@@ -616,11 +622,15 @@ function theme_comstack_friends_link($variables) {
     }
   }
   else {
+    // Reload blocked relationships.
+    $relationship_type = user_relationships_type_load(array('machine_name' => 'comstack_blocked'));
+    $blocked_relationships = user_relationships_load(array('requester_id' => $requester_uid, 'requestee_id' => $requestee_uid, 'rtid' =>$relationship_type->rtid));
+
     // User hasn't blocked, so has the option to block them.
-    if (!isset($relationships['comstack_blocked'][$requestee_uid])) {
+    if (empty($blocked_relationships)) {
       $action = 'block';
     }
-    elseif (isset($relationships['comstack_blocked'][$requestee_uid]) && $relationships['comstack_blocked'][$requestee_uid]->_requester_id == $requester_uid) {
+    elseif (!empty($blocked_relationships)) {
       $action = 'unblock';
     }
   }
