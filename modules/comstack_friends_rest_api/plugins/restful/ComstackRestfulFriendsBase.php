@@ -297,6 +297,12 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
    * Create a new relationship request.
    */
   public function newRequest() {
+    // Check for the killswitch.
+    if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+      $this->setHttpHeaders('Status', 403);
+      throw new ComstackFriendsReadOnlyException();
+    }
+
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;
@@ -349,6 +355,12 @@ class ComstackFriendsRestfulBase extends \ComstackRestfulEntityBase {
    * "reason" should be one of: cancel, disapprove, remove.
    */
   public function deleteEntity($entity_id) {
+    // Check for the killswitch.
+    if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+      $this->setHttpHeaders('Status', 403);
+      throw new ComstackFriendsReadOnlyException();
+    }
+
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;

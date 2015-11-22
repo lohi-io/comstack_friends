@@ -15,4 +15,6 @@ function comstack_friends_uninstall() {
   variable_del('comstack_friends_exclude_roles');
   variable_del('comstack_friends_opted_out_hide');
   variable_del('comstack_friends_add_links_to_profiles');
+  variable_del('comstack_friends_killswitch__enabled');
+  variable_del('comstack_friends_killswitch__text');
 }

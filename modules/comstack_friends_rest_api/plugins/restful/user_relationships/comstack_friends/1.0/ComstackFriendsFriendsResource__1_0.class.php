@@ -66,6 +66,12 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
    * @throws RestfulException.
    */
   public function approveEntity() {
+    // Check for the killswitch.
+    if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+      $this->setHttpHeaders('Status', 403);
+      throw new ComstackFriendsReadOnlyException();
+    }
+
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;
@@ -97,6 +103,12 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
    * Reject a relationship request.
    */
   public function rejectEntity() {
+    // Check for the killswitch.
+    if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+      $this->setHttpHeaders('Status', 403);
+      throw new ComstackFriendsReadOnlyException();
+    }
+
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;
@@ -123,6 +135,12 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
    * Delete a relationship.
    */
   public function deleteEntity($entity_id) {
+    // Check for the killswitch.
+    if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+      $this->setHttpHeaders('Status', 403);
+      throw new ComstackFriendsReadOnlyException();
+    }
+
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;
@@ -146,6 +164,12 @@ class ComstackFriendsFriendsResource__1_0 extends \ComstackFriendsRestfulBase {
    * Cancel an unapproved request.
    */
   public function cancelEntity() {
+    // Check for the killswitch.
+    if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+      $this->setHttpHeaders('Status', 403);
+      throw new ComstackFriendsReadOnlyException();
+    }
+
     // Check access.
     $account = $this->getAccount();
     $bundle = $this->bundle;

@@ -5,6 +5,7 @@
  */
 
 include_once 'comstack_friends.features.inc';
+include_once __DIR__ . '/includes/comstack_friends.forms.inc';
 
 /**
  * @file
@@ -16,6 +17,11 @@ include_once 'comstack_friends.features.inc';
  */
 function comstack_friends_permission() {
   return array(
+    'administer comstack_friends settings' => array(
+      'title' => t('Administer Communications Stack Friends settings'),
+      'description' => t('Allows a user to set read only mode on to users of the Friends functionality.'),
+      'restrict access' => TRUE,
+    ),
     'access other users comstack_friends' => array(
       'title' => t('Access other users friends lists'),
       'description' => t('Allows users to view other users friends lists.'),
@@ -35,12 +41,14 @@ function comstack_friends_permission() {
  * Implements hook_menu().
  */
 function comstack_friends_menu() {
+  $items = array();
+
   $items['admin/structure/comstack/settings/friends'] = array(
     'title' => 'Comstack Friends Settings',
     'description' => 'Settings relating to the Comstack Friends functionality.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('comstack_friends_admin_settings_form'),
-    'access arguments' => array('administer comstack settings'),
+    'access arguments' => array('administer comstack_friends settings'),
   );
 
   // /cs-friends/[request|accept|reject|block|unblock]/[uid]/[target_uid]/token/ctools_js
@@ -204,50 +212,6 @@ function comstack_friends_form_views_exposed_form_alter(&$form, $form_state, $fo
 }
 
 /**
- * Admin area settings form callback.
- */
-function comstack_friends_admin_settings_form() {
-  $form = array();
-
-  $form['comstack_friends_add_links_to_profiles'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Add friend &amp; block links to user profiles'),
-    '#default_value' => variable_get('comstack_friends_add_links_to_profiles', TRUE),
-  );
-
-  $form['comstack_friends_opted_out_hide'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('If a user has opted out, prevent them from being blocked'),
-    '#description' => t('This will hide the block link on a users profile if they do not allow friend requests.'),
-    '#default_value' => variable_get('comstack_friends_opted_out_hide', FALSE),
-  );
-
-  $form['comstack_friends_dissolve_on_block'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('When a user blocks another user, dissolve their friendship'),
-    '#description' => t('When a user blocks another user, if they have a friendship should it be ended?'),
-    '#default_value' => variable_get('comstack_friends_dissolve_on_block', TRUE),
-  );
-
-  $form['comstack_friends_already_friends_hide_button'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Hide the "Add friend" button if the users are already friends'),
-    '#description' => t('If the users are already friends then a button will be output, but disabled. Check this to hide the button entirely.'),
-    '#default_value' => variable_get('comstack_friends_already_friends_hide_button', TRUE),
-  );
-
-  $form['comstack_friends_exclude_roles'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Roles to exclude from the Friend &amp; Block functionality'),
-    '#description' => t('You can exclude certain roles from being friended and blocked by selecting them here. This is in addition to whatever permissions have been defined.'),
-    '#options' => drupal_map_assoc(user_roles(TRUE), 'check_plain'),
-    '#default_value' => variable_get('comstack_friends_exclude_roles', array()),
-  );
-
-  return system_settings_form($form);
-}
-
-/**
  * View access plugin callback.
  */
 function comstack_friends_views_check_perm($bypass_perm, $perm, $account = NULL) {
@@ -320,6 +284,13 @@ function comstack_friends_action_access_callback($action, $uid, $target_uid, $to
 
   // Go away, anon!
   if (!$user->uid) {
+    return FALSE;
+  }
+
+  /**
+   * If the killswitch is on, don't allow changes.
+   */
+  if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
     return FALSE;
   }
 
@@ -540,6 +511,24 @@ function comstack_friends_add_link_js() {
 }
 
 /**
+ * Add a Drupal set message if read only mode is active and text is set.
+ */
+function comstack_friends_read_only_set_message() {
+  static $_comstack_friends_read_only_message_set;
+
+  // Only do this once.
+  if (isset($_comstack_friends_read_only_message_set)) {
+    return FALSE;
+  }
+
+  $text = trim(filter_xss(variable_get('comstack_friends_killswitch__text', '')));
+  if ($text != '') {
+    drupal_set_message($text, 'warning');
+  }
+  $_comstack_friends_read_only_message_set = TRUE;
+}
+
+/**
  * Theme callback, produce a Comstack friends link.
  */
 function theme_comstack_friends_link($variables) {
@@ -638,6 +627,14 @@ function theme_comstack_friends_link($variables) {
     elseif (!empty($blocked_relationships)) {
       $action = 'unblock';
     }
+  }
+
+  /**
+   * Disable the button if the killswitch is active.
+   */
+  if (variable_get('comstack_friends_killswitch__enabled', FALSE)) {
+    $disabled = TRUE;
+    comstack_friends_read_only_set_message();
   }
 
   // And the link text, "request" action is the default.
