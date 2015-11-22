@@ -42,7 +42,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['empty']['area_text_custom']['table'] = 'views';
   $handler->display->display_options['empty']['area_text_custom']['field'] = 'area_text_custom';
   $handler->display->display_options['empty']['area_text_custom']['empty'] = TRUE;
-  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">You\'ve not added any friends yet.</p>';
+  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">You haven\'t added any friends yet.</p>';
   /* Relationship: User relationships: Requestee user */
   $handler->display->display_options['relationships']['requestee_id']['id'] = 'requestee_id';
   $handler->display->display_options['relationships']['requestee_id']['table'] = 'user_relationships';
@@ -145,7 +145,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['empty']['area_text_custom']['table'] = 'views';
   $handler->display->display_options['empty']['area_text_custom']['field'] = 'area_text_custom';
   $handler->display->display_options['empty']['area_text_custom']['empty'] = TRUE;
-  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">You\'ve not got any pending requests.</p>';
+  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">You have no pending friend requests.</p>';
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: User: Name */
   $handler->display->display_options['fields']['name']['id'] = 'name';
@@ -234,7 +234,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['empty']['area_text_custom']['table'] = 'views';
   $handler->display->display_options['empty']['area_text_custom']['field'] = 'area_text_custom';
   $handler->display->display_options['empty']['area_text_custom']['empty'] = TRUE;
-  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">You\'ve not blocked any other users.</p>';
+  $handler->display->display_options['empty']['area_text_custom']['content'] = '<p class="text-center">You haven\'t blocked anyone yet.</p>';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: User relationships: Relationship status */
@@ -280,6 +280,7 @@ function comstack_friends_views_default_views() {
   $handler->display->display_options['css_class'] = 'friends-list';
   $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['group_by'] = TRUE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['access']['perm'] = 'access user profiles';
   $handler->display->display_options['cache']['type'] = 'none';
