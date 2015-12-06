@@ -133,7 +133,12 @@
 
           // Or maybe remove a few things...
           if (data.removeSelector && data.removeSelector != '') {
-            $(data.removeSelector, context).each(function(){
+            $(data.removeSelector, context).remove();
+          }
+
+          // Fade some stuff out.
+          if (data.fadeSelector && data.fadeSelector != '') {
+            $(data.fadeSelector, context).each(function(){
               $(this).parent().parent().find('a').attr('disabled', 'disabled');
               $(this).closest('.media,.views-row').fadeTo('fast', 0.3);
             });
