@@ -156,6 +156,14 @@
             updateLink(data.html);
           }
 
+          // Fire an event so other scripts are aware an action has taken place.
+          $.event.trigger({
+            type: 'cs-f-ajax-success',
+            actionType: currentLink.attr('data-cs-f-action'),
+            username: currentLink.attr('data-username'),
+            uid: currentLink.attr('data-uid')
+          });
+
           // Remove the modal.
           modalCancel();
         },
