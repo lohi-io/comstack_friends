@@ -217,8 +217,9 @@ function comstack_friends_form_views_exposed_form_alter(&$form, $form_state, $fo
 function comstack_friends_views_check_perm($bypass_perm, $perm, $account = NULL) {
   global $user;
 
-  if (!$account) {
-    $account = $user;
+  // User must be logged in.
+  if (!$user->uid) {
+    return FALSE;
   }
 
   // Check the permission first.
