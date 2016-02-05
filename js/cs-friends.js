@@ -161,7 +161,8 @@
             type: 'cs-f-ajax-success',
             actionType: currentLink.attr('data-cs-f-action'),
             username: currentLink.attr('data-username'),
-            uid: currentLink.attr('data-uid')
+            requester: currentLink.attr('data-requester-uid'),
+            requestee: currentLink.attr('data-requestee-uid')
           });
 
           // Remove the modal.
