@@ -226,9 +226,6 @@ function comstack_friends_views_check_perm($bypass_perm, $perm, $account = NULL)
   if (!$account && (arg(0) === 'user' || arg(0) === 'friends') && is_numeric(arg(1)) && $user->uid == arg(1)) {
     $account = $user;
   }
-  else {
-    return FALSE;
-  }
 
   // Check the permission first.
   if (user_access($bypass_perm, $account)) {
